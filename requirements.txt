@@ -1,13 +1,13 @@
 
 # 핵심 패키지 (안정된 버전)
-streamlit>=1.25.0,<1.30.0
-pandas>=1.5.0,<2.0.0
-numpy>=1.21.0,<1.25.0
-scikit-learn>=1.1.0,<1.4.0
-plotly>=5.10.0,<6.0.0
+streamlit
+pandas
+numpy
+scikit-learn
+plotly
 
 # 생물정보학 (선택사항)
-# biopython>=1.79
+# biopython
 
 # 기타 유틸리티
-python-dateutil>=2.8.0
+python-dateutil
