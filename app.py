@@ -833,63 +833,9 @@ def main():
         - 코드 기여
         - 논문 인용
         """)
+
     
-    # 연락처 및 인용 정보
-    st.markdown("---")
-    st.markdown("### 📞 연락처 & 인용")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        **🏛️ 개발진:**
-        - 주 개발자: 김우석
-        - 지도교수: [교수명]
-        - 소속: [대학/연구소]
-        - 이메일: contact@lab.edu
-        
-        **🔗 링크:**
-        - [GitHub Repository](https://github.com/username/hic-predictor)
-        - [연구실 홈페이지](https://lab.edu)
-        - [논문 링크](https://journal.com/paper)
-        """)
-    
-    with col2:
-        st.markdown("""
-        **📝 인용 정보:**
-        
-        이 도구를 연구에 사용하시는 경우 다음과 같이 인용해주세요:
-        
-        ```
-        Kim, W. et al. (2024). 
-        HIC Efficiency Predictor: AI-powered 
-        Hydrophobic Interaction Chromatography 
-        Efficiency Prediction Tool. 
-        Bioinformatics, 40(12), 1234-1245.
-        ```
-        
-        **🏆 성과:**
-        - 📰 Nature Biotechnology 소개
-        - 🥇 Best AI Tool Award 2024
-        - 📊 1000+ 사용자
-        - 🔬 50+ 연구 논문 인용
-        """)
-    
-    # 라이선스 및 면책 조항
-    st.markdown("---")
-    st.markdown("""
-    ### ⚖️ 라이선스 및 면책 조항
-    
-    **라이선스:** MIT License - 상업적 사용 허용
-    
-    **면책 조항:** 
-    이 도구는 연구 목적으로만 제공되며, 예측 결과에 대한 어떠한 보증도 제공하지 않습니다. 
-    실제 단백질 정제에 앞서 실험적 검증을 반드시 수행하시기 바랍니다.
-    
-    **데이터 정책:** 
-    입력된 서열 데이터는 저장되지 않으며, 예측 결과만 일시적으로 표시됩니다.
-    """)
-    
+  
     # 푸터
     st.markdown("---")
     st.markdown("""
