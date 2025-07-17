@@ -740,7 +740,6 @@ def main():
     <div style="text-align: center; color: #666; margin-top: 2rem;">
         <p>🧬 <strong>HIC Efficiency Predictor v1.0</strong></p>
         <p>AI-powered Hydrophobic Interaction Chromatography Prediction Tool</p>
-        <p>Made with ❤️ for the research community</p>
         <p style="font-size: 0.8em; margin-top: 1rem;">
             © 2024 | 세계 최초 서열 기반 HIC 효율 예측 도구
         </p>
