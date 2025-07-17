@@ -11,3 +11,4 @@ plotly
 
 # 기타 유틸리티
 python-dateutil
+matplotlib
