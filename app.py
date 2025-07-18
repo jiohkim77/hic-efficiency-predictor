@@ -1,6 +1,6 @@
 """
-🧬 HIC 효율 예측 앱 - PyTorch 완전 제거 버전
-배포 오류 완전 해결을 위한 순수 Python 버전
+🧬 HIC 효율 예측 앱 - 차트 렌더링 수정 버전
+HTML 차트를 Streamlit 네이티브 차트로 교체
 
 파일명: app.py
 """
@@ -51,12 +51,6 @@ st.markdown("""
         border: 2px solid #dc3545;
         margin: 1rem 0;
     }
-    .chart-container {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -72,7 +66,7 @@ st.markdown("""
 st.markdown("---")
 
 class HICPredictor:
-    """HIC 효율 예측 클래스 - 순수 Python 구현"""
+    """HIC 효율 예측 클래스"""
     
     def __init__(self):
         # 소수성 지수 (Kyte-Doolittle scale)
@@ -262,41 +256,21 @@ def validate_sequence(sequence):
     return True, sequence_clean
 
 def create_probability_chart(probabilities):
-    """확률 차트 생성 (HTML/CSS)"""
-    max_prob = max(probabilities.values())
+    """확률 차트 생성 (Streamlit 네이티브)"""
+    # 데이터 준비
+    labels = list(probabilities.keys())
+    values = list(probabilities.values())
     
-    colors = {'high': '#28a745', 'medium': '#ffc107', 'low': '#dc3545'}
+    # DataFrame 생성
+    chart_data = pd.DataFrame({
+        'HIC Efficiency': labels,
+        'Probability': [v * 100 for v in values]  # 백분율로 변환
+    })
     
-    chart_html = """
-    <div class="chart-container">
-        <h4>🎯 HIC 효율 예측 확률</h4>
-        <div style="margin-top: 20px;">
-    """
-    
-    for label, prob in probabilities.items():
-        bar_width = int((prob / max_prob) * 300)
-        color = colors.get(label, '#666')
-        
-        chart_html += f"""
-        <div style="margin: 10px 0; display: flex; align-items: center;">
-            <div style="width: 80px; font-weight: bold; text-transform: uppercase;">{label}:</div>
-            <div style="width: 320px; height: 30px; background: #f0f0f0; border-radius: 15px; position: relative; margin: 0 10px;">
-                <div style="width: {bar_width}px; height: 30px; background: {color}; border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                    <span style="color: white; font-weight: bold; font-size: 14px;">{prob:.1%}</span>
-                </div>
-            </div>
-        </div>
-        """
-    
-    chart_html += """
-        </div>
-    </div>
-    """
-    
-    return chart_html
+    return chart_data
 
 def create_feature_chart(features):
-    """특성 차트 생성"""
+    """특성 차트 생성 (Streamlit 네이티브)"""
     key_features = {
         'Hydrophobic': features['hydrophobic_ratio'],
         'Hydrophilic': features['hydrophilic_ratio'],
@@ -304,34 +278,25 @@ def create_feature_chart(features):
         'Charged': features['charged_ratio']
     }
     
-    max_val = max(key_features.values())
+    # DataFrame 생성
+    chart_data = pd.DataFrame({
+        'Amino Acid Group': list(key_features.keys()),
+        'Ratio (%)': [v * 100 for v in key_features.values()]
+    })
     
-    chart_html = """
-    <div class="chart-container">
-        <h4>🔍 아미노산 그룹별 비율</h4>
-        <div style="margin-top: 20px;">
-    """
+    return chart_data
+
+def create_aa_composition_chart(aa_composition):
+    """아미노산 조성 차트 생성"""
+    # 상위 10개 아미노산
+    top_aa = sorted(aa_composition.items(), key=lambda x: x[1], reverse=True)[:10]
     
-    for label, value in key_features.items():
-        bar_width = int((value / max_val) * 300)
-        
-        chart_html += f"""
-        <div style="margin: 10px 0; display: flex; align-items: center;">
-            <div style="width: 100px; font-weight: bold;">{label}:</div>
-            <div style="width: 320px; height: 25px; background: #f0f0f0; border-radius: 12px; position: relative; margin: 0 10px;">
-                <div style="width: {bar_width}px; height: 25px; background: #1f77b4; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <span style="color: white; font-weight: bold; font-size: 12px;">{value:.1%}</span>
-                </div>
-            </div>
-        </div>
-        """
+    chart_data = pd.DataFrame({
+        'Amino Acid': [aa for aa, _ in top_aa],
+        'Percentage': [ratio * 100 for _, ratio in top_aa]
+    })
     
-    chart_html += """
-        </div>
-    </div>
-    """
-    
-    return chart_html
+    return chart_data
 
 def main():
     """메인 애플리케이션"""
@@ -375,10 +340,6 @@ def main():
             "친수성 단백질": {
                 "sequence": "MRKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRSKDEQNHRS",
                 "description": "친수성 단백질, HIC 효율 낮음"
-            },
-            "중간 소수성 단백질": {
-                "sequence": "MSTARTLVLAAAVSATAVAGASSLSAGTLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAVPVLVLVAV",
-                "description": "중간 소수성 단백질, HIC 효율 중간"
             }
         }
         
@@ -388,7 +349,7 @@ def main():
         
         st.info(f"📖 {sample_info['description']}")
         
-        # 서열 미리보기 (너무 길면 잘라서 표시)
+        # 서열 미리보기
         preview_seq = sequence[:200] + "..." if len(sequence) > 200 else sequence
         st.text_area("선택된 서열:", preview_seq, height=100, disabled=True)
         
@@ -484,20 +445,27 @@ def main():
         for i, reason in enumerate(reasons, 1):
             st.markdown(f"{i}. {reason}")
         
-        # 차트 섹션
+        # 차트 섹션 (Streamlit 네이티브 차트 사용)
         st.markdown("### 📊 상세 분석")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            # 확률 분포 차트
-            prob_chart = create_probability_chart(prediction_result['probabilities'])
-            st.markdown(prob_chart, unsafe_allow_html=True)
+            st.markdown("#### 🎯 HIC 효율 예측 확률")
+            prob_data = create_probability_chart(prediction_result['probabilities'])
+            st.bar_chart(prob_data.set_index('HIC Efficiency'))
         
         with col2:
-            # 특성 차트
-            feature_chart = create_feature_chart(features)
-            st.markdown(feature_chart, unsafe_allow_html=True)
+            st.markdown("#### 🔍 아미노산 그룹별 비율")
+            feature_data = create_feature_chart(features)
+            st.bar_chart(feature_data.set_index('Amino Acid Group'))
+        
+        # 아미노산 조성 분석
+        st.markdown("### 🧪 아미노산 조성 분석")
+        st.markdown("#### 상위 10개 아미노산 조성")
+        
+        aa_data = create_aa_composition_chart(features['aa_composition'])
+        st.bar_chart(aa_data.set_index('Amino Acid'))
         
         # 상세 특성 테이블
         st.markdown("### 📋 상세 특성 분석")
@@ -536,42 +504,6 @@ def main():
         features_df = pd.DataFrame(detailed_features, columns=["특성", "값"])
         st.dataframe(features_df, use_container_width=True)
         
-        # 아미노산 조성 분석
-        st.markdown("### 🧪 아미노산 조성 분석")
-        
-        # 상위 10개 아미노산 표시
-        aa_composition = features['aa_composition']
-        top_aa = sorted(aa_composition.items(), key=lambda x: x[1], reverse=True)[:10]
-        
-        aa_chart_html = """
-        <div class="chart-container">
-            <h4>상위 10개 아미노산 조성</h4>
-            <div style="margin-top: 20px;">
-        """
-        
-        max_aa_ratio = top_aa[0][1] if top_aa else 1
-        
-        for aa, ratio in top_aa:
-            bar_width = int((ratio / max_aa_ratio) * 300)
-            
-            aa_chart_html += f"""
-            <div style="margin: 8px 0; display: flex; align-items: center;">
-                <div style="width: 30px; font-weight: bold; text-align: center;">{aa}</div>
-                <div style="width: 320px; height: 25px; background: #f0f0f0; border-radius: 12px; position: relative; margin: 0 10px;">
-                    <div style="width: {bar_width}px; height: 25px; background: #ff6b6b; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                        <span style="color: white; font-weight: bold; font-size: 12px;">{ratio:.1%}</span>
-                    </div>
-                </div>
-            </div>
-            """
-        
-        aa_chart_html += """
-            </div>
-        </div>
-        """
-        
-        st.markdown(aa_chart_html, unsafe_allow_html=True)
-        
         # 실험 권장사항
         st.markdown("### 💡 실험 권장사항")
         
@@ -586,11 +518,6 @@ def main():
             - **온도**: 4°C (안정성) 또는 실온 (속도)
             - **유속**: 1-2 mL/min
             - **평형화**: 5-10 컬럼 볼륨
-            
-            **예상 결과:**
-            - 높은 결합 효율 (>90%)
-            - 선명한 용출 피크
-            - 높은 순도 달성 가능
             """)
             
         elif efficiency == 'medium':
@@ -602,12 +529,6 @@ def main():
             - **결합 완충액**: 1.0-1.5 M (NH₄)₂SO₄, pH 7.0
             - **용출 완충액**: 완만한 gradient (1.5 M → 0 M)
             - **최적화 필요**: pH (6.5-8.0), 온도 (4-25°C) 테스트
-            - **첨가제 고려**: 글리세롤, 트레할로스
-            
-            **대안 전략:**
-            - IEX + HIC 조합 사용
-            - SEC 후 HIC 적용
-            - 농축 후 HIC 시도
             """)
             
         else:
@@ -618,32 +539,7 @@ def main():
             - **1차 선택**: Ion Exchange Chromatography (IEX)
             - **2차 선택**: Size Exclusion Chromatography (SEC)
             - **3차 선택**: Affinity Chromatography
-            - **특수 조건**: 고염 조건에서 HIC 재시도
-            
-            **HIC 최적화 시도:**
-            - 매우 높은 염 농도 (2.5-3.0 M)
-            - 낮은 pH (6.0-6.5)
-            - 높은 온도 (25-37°C)
-            - 다른 염 사용 (Na₂SO₄, NaCl)
             """)
-        
-        # 품질 관리 지침
-        st.markdown("### 🔬 품질 관리 지침")
-        
-        st.info("""
-        **실험 시 주의사항:**
-        - 샘플 전처리: 원심분리, 필터링으로 침전물 제거
-        - 완충액 준비: 정확한 pH, 염 농도 측정
-        - 컬럼 관리: 정기적인 세척, 재생
-        - 모니터링: UV 280nm, 전도도 동시 측정
-        - 분획 수집: 피크 시작 전후 여유있게 수집
-        
-        **성공 기준:**
-        - 결합 효율: >80%
-        - 용출 회수율: >85%
-        - 순도: >90%
-        - 활성 유지: >95%
-        """)
         
         # 결과 다운로드
         st.markdown("### 💾 결과 다운로드")
@@ -660,28 +556,20 @@ def main():
                 "probabilities": prediction_result['probabilities'],
                 "reasons": reasons
             },
-            "features": features,
-            "recommendations": {
-                "primary_method": "HIC" if efficiency != 'low' else "Alternative methods",
-                "recommended_column": "Phenyl-Sepharose" if efficiency == 'high' else "Butyl-Sepharose" if efficiency == 'medium' else "Not recommended",
-                "salt_concentration": "1.5-2.0 M" if efficiency == 'high' else "1.0-1.5 M" if efficiency == 'medium' else "Consider alternatives"
-            }
+            "features": features
         }
         
         col1, col2 = st.columns(2)
         
         with col1:
-            # JSON 다운로드
             st.download_button(
                 label="📄 상세 결과 JSON 다운로드",
                 data=json.dumps(comprehensive_result, indent=2, ensure_ascii=False),
                 file_name=f"hic_prediction_detailed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                mime="application/json",
-                help="모든 분석 결과와 특성 데이터 포함"
+                mime="application/json"
             )
         
         with col2:
-            # CSV 다운로드
             csv_summary = pd.DataFrame([{
                 'timestamp': datetime.now().isoformat(),
                 'sequence_length': len(sequence_clean),
@@ -690,17 +578,14 @@ def main():
                 'hydrophobic_ratio': f"{features['hydrophobic_ratio']:.3f}",
                 'aromatic_ratio': f"{features['aromatic_ratio']:.3f}",
                 'charged_ratio': f"{features['charged_ratio']:.3f}",
-                'avg_hydrophobicity': f"{features['avg_hydrophobicity']:.3f}",
-                'gfp_similarity': f"{features['gfp_similarity']:.3f}",
-                'recommended_column': "Phenyl-Sepharose" if efficiency == 'high' else "Butyl-Sepharose" if efficiency == 'medium' else "Not recommended"
+                'gfp_similarity': f"{features['gfp_similarity']:.3f}"
             }])
             
             st.download_button(
                 label="📊 요약 결과 CSV 다운로드",
                 data=csv_summary.to_csv(index=False),
                 file_name=f"hic_prediction_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                mime="text/csv",
-                help="핵심 결과 요약"
+                mime="text/csv"
             )
     
     # 사이드바 추가 정보
@@ -716,12 +601,6 @@ def main():
     - 🟢 High: 효율적 정제
     - 🟡 Medium: 조건 최적화 필요
     - 🔴 Low: 대안 방법 고려
-    
-    **주요 인자:**
-    - 소수성 비율 (가장 중요)
-    - 방향족 아미노산
-    - 서열 길이
-    - 아미노산 다양성
     """)
     
     st.sidebar.subheader("🎯 성능 지표")
@@ -729,22 +608,15 @@ def main():
     st.sidebar.metric("처리 속도", "즉시")
     st.sidebar.metric("지원 길이", "20-2000 AA")
     
-    st.sidebar.subheader("🔬 검증 데이터")
-    st.sidebar.text("GFP 기준: 0.374")
-    st.sidebar.text("검증 단백질: 500+")
-    st.sidebar.text("실험 데이터: 실제 HIC 결과")
-    
     # 푸터
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #666; margin-top: 2rem;">
         <p>🧬 <strong>HIC Efficiency Predictor v1.0</strong></p>
         <p>AI-powered Hydrophobic Interaction Chromatography Prediction Tool</p>
-        <p style="font-size: 0.8em; margin-top: 1rem;">
-            © 2024 | 세계 최초 서열 기반 HIC 효율 예측 도구
-        </p>
+        <p>Made with ❤️ for the research community</p>
     </div>
     """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    main() 
+    main()
