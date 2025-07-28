@@ -614,7 +614,6 @@ def main():
     <div style="text-align: center; color: #666; margin-top: 2rem;">
         <p>🧬 <strong>HIC Efficiency Predictor v1.0</strong></p>
         <p>AI-powered Hydrophobic Interaction Chromatography Prediction Tool</p>
-        <p>Made with ❤️ for the research community</p>
     </div>
     """, unsafe_allow_html=True)
 
